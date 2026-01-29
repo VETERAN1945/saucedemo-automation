@@ -1,57 +1,58 @@
 const { test, expect } = require('@playwright/test');
+const LoginPage = require('../pages/LoginPage');
+const InventoryPage = require('../pages/InventoryPage');
 
 test.describe('Multiple Items Tests', () => {
 
   test.beforeEach(async ({ page }) => {
-    // 1. Open login page
-    await page.goto('https://www.saucedemo.com/');
-    console.log('✅ Opened login page');
+    const loginPage = new LoginPage(page);
     
-    // 2. Login with valid credentials
-    await page.locator('#user-name').fill('standard_user');
-    await page.locator('#password').fill('secret_sauce');
-    await page.locator('#login-button').click();
-    console.log('✅ Logged in successfully');
+    await loginPage.goto();
+    await loginPage.login('standard_user', 'secret_sauce');
     
-    // 3. Verify we are on products page
     await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-    console.log('✅ On products page');
+    console.log('✅ Logged in and on products page');
   });
 
   test('Add multiple items to cart', async ({ page }) => {
-    // 1. Add first item (Backpack)
-    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    const inventoryPage = new InventoryPage(page);
+    
+    // Add first item (Backpack)
+    await inventoryPage.addItemToCart('sauce-labs-backpack');
     console.log('✅ Added Backpack to cart');
     
-    // 2. Verify cart badge shows "1"
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    // Verify cart badge shows "1"
+    let cartCount = await inventoryPage.getCartCount();
+    expect(cartCount).toBe('1');
     console.log('✅ Cart badge shows 1');
     
-    // 3. Add second item (Bike Light)
-    await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
+    // Add second item (Bike Light)
+    await inventoryPage.addItemToCart('sauce-labs-bike-light');
     console.log('✅ Added Bike Light to cart');
     
-    // 4. Verify cart badge shows "2"
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('2');
+    // Verify cart badge shows "2"
+    cartCount = await inventoryPage.getCartCount();
+    expect(cartCount).toBe('2');
     console.log('✅ Cart badge shows 2');
     
-    // 5. Add third item (Bolt T-Shirt)
-    await page.locator('[data-test="add-to-cart-sauce-labs-bolt-t-shirt"]').click();
+    // Add third item (Bolt T-Shirt)
+    await inventoryPage.addItemToCart('sauce-labs-bolt-t-shirt');
     console.log('✅ Added Bolt T-Shirt to cart');
     
-    // 6. Verify cart badge shows "3"
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('3');
+    // Verify cart badge shows "3"
+    cartCount = await inventoryPage.getCartCount();
+    expect(cartCount).toBe('3');
     console.log('✅ Cart badge shows 3');
     
-    // 7. Click on cart icon
-    await page.locator('.shopping_cart_link').click();
+    // Click on cart icon
+    await inventoryPage.openCart();
     console.log('✅ Clicked on cart icon');
     
-    // 8. Verify we are on cart page
+    // Verify we are on cart page
     await expect(page).toHaveURL('https://www.saucedemo.com/cart.html');
     console.log('✅ On cart page');
     
-    // 9. Verify all 3 items are in the cart
+    // Verify all 3 items are in the cart
     const cartItems = page.locator('.cart_item');
     await expect(cartItems).toHaveCount(3);
     console.log('✅ All 3 items are in the cart');

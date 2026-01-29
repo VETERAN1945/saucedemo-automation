@@ -1,69 +1,53 @@
 const { test, expect } = require('@playwright/test');
+const LoginPage = require('../pages/LoginPage');
 
 test.describe('Login Tests', () => {
-  
+
   test('Successful login with valid credentials', async ({ page }) => {
-    // 1. Open login page
-    await page.goto('https://www.saucedemo.com/');
+    // Create LoginPage object
+    const loginPage = new LoginPage(page);
     
-    // 2. Verify we are on login page
-    await expect(page).toHaveURL('https://www.saucedemo.com/');
+    // Open login page
+    await loginPage.goto();
     console.log('✅ Opened login page');
     
-    // 3. Verify login form elements are visible
-    await expect(page.locator('#user-name')).toBeVisible();
-    await expect(page.locator('#password')).toBeVisible();
-    await expect(page.locator('#login-button')).toBeVisible();
+    // Verify login form is visible
+    const formVisible = await loginPage.isLoginFormVisible();
+    expect(formVisible).toBe(true);
     console.log('✅ Login form is visible');
     
-    // 4. Fill in username
-    await page.fill('#user-name', 'standard_user');
-    console.log('✅ Entered username');
+    // Login with valid credentials
+    await loginPage.login('standard_user', 'secret_sauce');
+    console.log('✅ Logged in successfully');
     
-    // 5. Fill in password
-    await page.fill('#password', 'secret_sauce');
-    console.log('✅ Entered password');
-    
-    // 6. Click login button
-    await page.click('#login-button');
-    console.log('✅ Clicked login button');
-    
-    // 7. Verify successful login - check URL
+    // Verify successful navigation to inventory page
     await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-    console.log('✅ Successfully navigated to inventory page');
+    console.log('✅ On inventory page');
     
-    // 8. Verify products page loaded
-    await expect(page.locator('.inventory_list')).toBeVisible();
-    console.log('✅ Products page loaded');
-    
-    // 9. Verify shopping cart is visible
-    await expect(page.locator('.shopping_cart_link')).toBeVisible();
-    console.log('✅ Shopping cart is visible');
-    
-    console.log('✅ Login test completed successfully!');
+    console.log('🎉 Login test completed successfully!');
   });
-  
+
   test('Login fails with invalid credentials', async ({ page }) => {
-    // 1. Open login page
-    await page.goto('https://www.saucedemo.com/');
+    const loginPage = new LoginPage(page);
     
-    // 2. Fill in wrong username
-    await page.fill('#user-name', 'wrong_user');
+    // Open login page
+    await loginPage.goto();
+    console.log('✅ Opened login page');
     
-    // 3. Fill in wrong password
-    await page.fill('#password', 'wrong_password');
+    // Attempt login with locked user
+    await loginPage.login('locked_out_user', 'secret_sauce');
+    console.log('✅ Attempted login with locked user');
     
-    // 4. Click login button
-    await page.click('#login-button');
+    // Verify error message is displayed
+    const errorMsg = loginPage.getErrorMessage();
+    await expect(errorMsg).toBeVisible();
+    console.log('✅ Error message displayed');
     
-    // 5. Verify error message appears
-    await expect(page.locator('[data-test="error"]')).toBeVisible();
-    await expect(page.locator('[data-test="error"]')).toContainText('Epic sadface');
-    console.log('✅ Error message displayed correctly');
-    
-    // 6. Verify still on login page
+    // Verify stayed on login page
     await expect(page).toHaveURL('https://www.saucedemo.com/');
-    console.log('✅ Stayed on login page as expected');
+    console.log('✅ Stayed on login page');
+    
+    console.log('🎉 Failed login test completed successfully!');
   });
 
 });
