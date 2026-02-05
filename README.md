@@ -98,6 +98,13 @@ The project uses **Page Object Model (POM)** design pattern for better code orga
 - ✅ Successful logout
 - ✅ Re-login after logout
 
+- 7. API Tests (`api.spec.js`)
+* ✅ GET request - retrieve all products
+* ✅ POST request - create new product
+* ✅ GET request - retrieve single product by ID
+* ✅ Status code validation
+* ✅ JSON response structure validation
+
 ## 🚀 Installation & Setup
 
 ### Prerequisites
